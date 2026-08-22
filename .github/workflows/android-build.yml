@@ -57,15 +57,17 @@ jobs:
           cd android
           ./gradlew assembleDebug
 
-      - name: Dump merged manifest (diagnose cleartext)
+      - name: Rename APK with build number
         run: |
-          find android/app/build -name "AndroidManifest.xml" -path "*merged*" -exec echo "=== {} ===" \; -exec grep -cE 'usesCleartextTraffic|networkSecurityConfig' {} \;
-          echo "--- merged manifest cleartext lines ---"
-          find android/app/build -name "AndroidManifest.xml" -path "*merged*" -exec grep -E 'usesCleartextTraffic|networkSecurityConfig' {} \;
+          cd frontend/android/app/build/outputs/apk/debug
+          APK=$(ls *.apk 2>/dev/null | head -1)
+          if [ -n "$APK" ]; then
+            mv "$APK" "tomato-investor-v0.2.0-run${GITHUB_RUN_NUMBER}.apk"
+          fi
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tomato-investor-debug-apk
+          name: tomato-investor-debug-apk-run${GITHUB_RUN_NUMBER}
           path: frontend/android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
