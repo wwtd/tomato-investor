@@ -76,7 +76,9 @@ APK 内页面通过本地 assets 加载，**API 地址不写死**。前端启动
 - 已配置 → 用该地址（拼 `/api`）
 - 未配置 → Web 用相对 `/api`（走 Vite 代理）；原生(Capacitor)默认 `http://192.168.31.102:7800`
 
-在 App 首页「🔗 服务地址」可设置 + 测试连接，适用于 APK 指向任意后端。
+> 在 App 首页「🔗 服务地址」可设置 + 测试连接，适用于 APK 指向任意后端。
+
+> ⚠️ **APK 访问局域网 http 后端**：不要只用 `usesCleartextTraffic`/`networkSecurityConfig`（Capacitor WebView 对局域网 http 明文 + 跨源表现不稳定）。已在 `capacitor.config.ts` 启用 `plugins.CapacitorHttp.enabled=true`（官方机制），APK 内 fetch 走原生网络栈，绕开 WebView 限制。改代码后 `npx cap sync android` 即可。
 
 ### 本机改代码后同步
 ```bash
