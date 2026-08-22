@@ -76,6 +76,7 @@ textarea { resize: vertical; font-family: inherit; }
 
 .muted { color: var(--muted); }
 .error { color: var(--danger); padding: 8px; background: rgba(233,69,96,.1); border-radius: 6px; margin: 8px 0; }
+.ok { color: var(--ok); padding: 8px; background: rgba(76,175,80,.1); border-radius: 6px; margin: 8px 0; }
 
 /* project grid */
 .project-grid {

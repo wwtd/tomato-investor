@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api, type Project, type Settings } from "../api";
+import { api, getServerUrl, setServerUrl, type Project, type Settings } from "../api";
 
 export function ProjectList({
   onOpen,
@@ -14,6 +14,7 @@ export function ProjectList({
   const [filter, setFilter] = useState<string>("");
   const [showCreate, setShowCreate] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showServer, setShowServer] = useState(false);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
@@ -42,6 +43,7 @@ export function ProjectList({
           <option value="archived_stoploss">止损归档</option>
         </select>
         <button onClick={() => setShowSettings(true)}>⚙ 设置</button>
+        <button onClick={() => setShowServer(true)}>🔗 服务地址</button>
         <button className="primary" onClick={() => setShowCreate(true)}>
           + 新项目
         </button>
@@ -76,6 +78,16 @@ export function ProjectList({
           onSaved={(s) => {
             onSettingsChange(s);
             setShowSettings(false);
+          }}
+        />
+      )}
+
+      {showServer && (
+        <ServerModal
+          onClose={() => setShowServer(false)}
+          onSaved={() => {
+            setShowServer(false);
+            load();
           }}
         />
       )}
@@ -221,6 +233,63 @@ function SettingsModal({
         <button onClick={onClose}>取消</button>
         <button className="primary" onClick={save} disabled={saving}>
           {saving ? "保存中…" : "保存"}
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+function ServerModal({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
+  const [url, setUrl] = useState(getServerUrl());
+  const [err, setErr] = useState("");
+  const [ok, setOk] = useState(false);
+  const [testing, setTesting] = useState(false);
+
+  async function test() {
+    const candidate = url.trim().replace(/\/$/, "");
+    if (!candidate) {
+      setErr("请输入服务地址");
+      return;
+    }
+    setTesting(true);
+    setErr("");
+    setOk(false);
+    try {
+      // 刷新前临时尝试连接候选地址的后端 /api/settings
+      const res = await fetch(`${candidate}/api/settings`, { method: "GET" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setOk(true);
+    } catch (e: unknown) {
+      setErr((e instanceof Error ? e.message : String(e)) + " — 无法连接，请检查地址/后端是否启动");
+    } finally {
+      setTesting(false);
+    }
+  }
+
+  function save() {
+    setServerUrl(url);
+    onSaved();
+  }
+
+  return (
+    <Modal title="设置服务地址" onClose={onClose}>
+      <Field label="后端服务地址（APK/远程用，如 http://192.168.31.102:7800）">
+        <input
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="http://192.168.31.102:7800"
+        />
+        <span className="muted">留空 = 当前环境默认地址（Web 走代理，APK 用局域网后端）</span>
+      </Field>
+      {ok && <div className="ok">✅ 连接成功</div>}
+      {err && <div className="error">{err}</div>}
+      <div className="form-actions">
+        <button onClick={test} disabled={testing}>
+          {testing ? "测试中…" : "测试连接"}
+        </button>
+        <button onClick={onClose}>取消</button>
+        <button className="primary" onClick={save}>
+          保存
         </button>
       </div>
     </Modal>

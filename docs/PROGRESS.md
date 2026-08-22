@@ -4,6 +4,7 @@
 
 ## 决策日志
 - 2026-08-21: 锁定 MVP 范围。Go+React，单用户预留 owner_id，番茄=可配置时长(默认8h/480min)，会话=一次会话多次暂停(START→[PAUSE+comment→RESUME]*→END)，语音备注仅存音频+手填文本，部署=本地自托管 SQLite。
+- 2026-08-21: Android 打包方案 = 本地只做前端适配 + GitHub CI 出 Debug APK（无需本机 Android SDK/JDK）。API 地址改为运行时可配置（localStorage server_url）。
 
 ## 已完成
 - [x] 设计文档 docs/DESIGN.md
@@ -12,6 +13,10 @@
 - [x] 前端: 项目列表+创建、项目详情(预算/必要性/里程碑/历史会话)、番茄会话运行器(暂停/备注/语音录制)、设置
 - [x] 端到端 API smoke 验证通过
 - [x] 运行文档 docs/RUN.md
+- [x] Android: Capacitor 集成 (core/android/cli 8.5.0)，capacitor.config.ts (appId com.wwtd.tomatoinvestor)
+- [x] Android 适配: cleartext HTTP + RECORD_AUDIO 权限，删除模板占位测试
+- [x] API 服务地址可配置: api.ts getBase()/setServerUrl() 基于 localStorage; UI 加「🔗服务地址」+测试连接
+- [x] GitHub CI: .github/workflows/android-build.yml，自动 assembleDebug + 上传 APK artifact
 
 ## E2E 验证记录 (2026-08-21)
 全流程通过：
@@ -35,10 +40,10 @@
 - 语音: multipart 上传，存 data/voice/，不接 STT
 
 ## 下一步（非 MVP，按需迭代）
-- [ ] 前端浏览器实测（目前仅 API smoke；需 pnpm dev + 浏览器交互验证 UI）
+- [x] 移动端 APP（Capacitor + CI 出 debug APK，首次构建需 push 后查看 Actions 结果）
+- [ ] 前端浏览器实测 UI（需 pnpm dev + 浏览器交互）
 - [ ] STT 语音转写
 - [ ] 任务链并行视图
-- [ ] 移动端 APP
 - [ ] 多端同步优化
 
 ## 环境备忘

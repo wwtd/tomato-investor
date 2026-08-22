@@ -54,6 +54,31 @@ http://<本机局域网IP>:5173
 ```
 > 注意：通过局域网 IP（非 localhost/HTTPS）访问时，浏览器安全上下文限制会导致**录音不可用**。详见文档。
 
+## Android APK（Capacitor + GitHub CI）
+
+前端用 Capacitor 打包成安卓原生壳，无需重写。**APK 由 GitHub Actions 自动构建**，本机无需装 Android SDK/JDK。
+
+### CI 自动出包
+推送到 `main`（或手动触发 `workflow_dispatch`）后，GitHub Actions 自动：
+`pnpm install → pnpm build → npx cap sync android → ./gradlew assembleDebug`，产出 **debug APK**（无签名，可直接安装测试）。
+
+在仓库 **Actions** 页下载 artifact：`tomato-investor-debug-apk`。
+
+### APK 内服务地址
+APK 内页面通过本地 assets 加载，**API 地址不写死**。前端启动读取 `localStorage` 的 `server_url`：
+- 已配置 → 用该地址（拼 `/api`）
+- 未配置 → Web 用相对 `/api`（走 Vite 代理）；原生(Capacitor)默认 `http://192.168.31.102:7800`
+
+在 App 首页「🔗 服务地址」可设置 + 测试连接，适用于 APK 指向任意后端。
+
+### 本机改代码后同步
+```bash
+cd frontend
+pnpm build        # 产出 web 资源
+npx cap sync android   # 同步到 android 工程
+```
+> 本机验证 APK 需 Android Studio 或 CLI（需装 SDK）。仅出包用 CI。
+
 ## API 概览
 
 前缀 `/api`，REST/JSON。

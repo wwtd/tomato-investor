@@ -1,5 +1,29 @@
 // API 客户端 + 类型
-const BASE = "/api";
+
+// 服务地址：默认相对路径 /api（Web 走 Vite 代理）。
+// APK / 远程环境需配置绝对地址，存 localStorage。
+// 约定：server_url 存 http://host:port（不带 /api），最终拼出 `${server}/api`。
+const STORAGE_KEY = "server_url";
+
+export function getBase(): string {
+  // 显式配置的地址优先（APK / 远程）
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    return saved.replace(/\/$/, "") + "/api";
+  }
+  // 否则：原生环境（Capacitor）默认指向局域网后端；Web 用相对 /api 走代理
+  const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor;
+  const isNative = typeof cap?.isNativePlatform === "function" && cap.isNativePlatform();
+  return isNative ? "http://192.168.31.102:7800/api" : "/api";
+}
+
+export function setServerUrl(url: string) {
+  localStorage.setItem(STORAGE_KEY, url.trim().replace(/\/$/, ""));
+}
+
+export function getServerUrl(): string {
+  return localStorage.getItem(STORAGE_KEY) || "";
+}
 
 export interface Project {
   id: number;
@@ -72,7 +96,7 @@ export interface Stats {
 }
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(BASE + path, {
+  const res = await fetch(getBase() + path, {
     headers: { "Content-Type": "application/json" },
     ...init,
   });
@@ -128,7 +152,7 @@ export async function uploadVoice(sid: number, file: Blob, text: string, duratio
   fd.append("file", file);
   fd.append("text", text);
   fd.append("duration_ms", String(durationMs));
-  const res = await fetch(`${BASE}/sessions/${sid}/voice`, { method: "POST", body: fd });
+  const res = await fetch(`${getBase()}/sessions/${sid}/voice`, { method: "POST", body: fd });
   if (!res.ok) {
     const t = await res.text();
     throw new Error(t || `HTTP ${res.status}`);
@@ -136,4 +160,4 @@ export async function uploadVoice(sid: number, file: Blob, text: string, duratio
   return res.json();
 }
 
-export const voiceUrl = (fn: string) => `${BASE}/voice/${fn}`;
+export const voiceUrl = (fn: string) => `${getBase()}/voice/${fn}`;
