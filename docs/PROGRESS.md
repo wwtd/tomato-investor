@@ -7,6 +7,7 @@
 - 2026-08-21: Android 打包方案 = 本地只做前端适配 + GitHub CI 出 Debug APK（无需本机 Android SDK/JDK）。API 地址改为运行时可配置（localStorage server_url）。
 - 2026-08-21(排障): 手机连不上 7800 的根因 = Go `ListenAndServe(":7800")` 绑成 IPv6-only(::)双栈，安卓对 IPv4-mapped 处理不佳。修复：`--addr` 默认改 `0.0.0.0:7800`。另发 APK 需用真实数据库 `backend/data/tomato.db`（勿连 /tmp）。
 - 2026-08-22(APK 明文被拦,已解决): `usesCleartextTraffic` / `networkSecurityConfig` 在 Capacitor WebView 对「https://localhost origin + 局域网 http 明文」组合下不生效。**最终方案 = 启用 `plugins.CapacitorHttp.enabled=true`**（Capacitor 官方机制），在原生端 patch `window.fetch`/`XMLHttpRequest`，让 API 请求走原生网络栈，绕开 WebView 混合内容/CORS 限制。Web 端自动回退 fetch 向后兼容。**无需改 api.ts 业务代码。** 已实测手机 APK 运行良好。
+- 2026-08-22(consumed_minutes 恒 0,已解决): `mattn/go-sqlite3` 扫描 DATETIME 返回 RFC3339(`2026-08-22T02:10:33Z`)，而 `durMin` 用空格分隔 layout(`2006-01-02 15:04:05`)解析全部失败 → 运行时长恒 0。修复: `parseTime` 兼容空格+RFC3339 双格式，`nowUTC()` 统一 RFC3339。已投入分钟数现正确。
 
 ## 已完成
 - [x] 设计文档 docs/DESIGN.md
