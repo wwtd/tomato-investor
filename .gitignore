@@ -1,0 +1,9 @@
+# 数据与产物
+backend/data/
+frontend/dist/
+frontend/node_modules/
+*.log
+
+# 系统
+.DS_Store
+Thumbs.db
