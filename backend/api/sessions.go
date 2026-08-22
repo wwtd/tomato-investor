@@ -332,10 +332,25 @@ func sessionMinutesByID(d *sql.DB, sid int64, started string, ended sql.NullStri
 	return total
 }
 
+// parseTime 兼容 sqlite DATETIME 的两种输出格式：
+// 1. "2006-01-02 15:04:05"（空格分隔，无时区）
+// 2. "2006-01-02T15:04:05Z"（RFC3339，mattn/go-sqlite3 扫描 DATETIME 常给这种）
+func parseTime(s string) (time.Time, error) {
+	layouts := []string{"2006-01-02 15:04:05", time.RFC3339}
+	var lastErr error
+	for _, l := range layouts {
+		if t, err := time.Parse(l, s); err == nil {
+			return t, nil
+		} else {
+			lastErr = err
+		}
+	}
+	return time.Time{}, lastErr
+}
+
 func durMin(a, b string) int {
-	const layout = "2006-01-02 15:04:05"
-	ta, err1 := time.Parse(layout, a)
-	tb, err2 := time.Parse(layout, b)
+	ta, err1 := parseTime(a)
+	tb, err2 := parseTime(b)
 	if err1 != nil || err2 != nil {
 		return 0
 	}
@@ -347,7 +362,8 @@ func durMin(a, b string) int {
 }
 
 func nowUTC() string {
-	return time.Now().UTC().Format("2006-01-02 15:04:05")
+	// 与 sqlite 输出一致用 RFC3339，保证 durMin 能解析
+	return time.Now().UTC().Format(time.RFC3339)
 }
 
 func parseURLInt(w http.ResponseWriter, r *http.Request, key string) (int64, error) {
