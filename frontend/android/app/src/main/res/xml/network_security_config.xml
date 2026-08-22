@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- 允许所有域名的明文 http（局域网/自托管后端需要） -->
-    <base-config cleartextTrafficPermitted="true">
-        <trust-anchors>
-            <certificates src="system" />
-        </trust-anchors>
-    </base-config>
+    <!-- 允许所有域名的明文 http（局域网/自托管后端需要）。
+         最简形式：只声明 cleartextTrafficPermitted，不附带 trust-anchors，
+         避免部分 Android 版本对带 trust-anchors 的 base-config 解析问题。 -->
+    <base-config cleartextTrafficPermitted="true" />
 </network-security-config>
