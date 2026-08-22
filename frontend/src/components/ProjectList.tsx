@@ -246,21 +246,37 @@ function ServerModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =>
   const [testing, setTesting] = useState(false);
 
   async function test() {
-    const candidate = url.trim().replace(/\/$/, "");
+    let candidate = url.trim().replace(/\/$/, "");
     if (!candidate) {
       setErr("请输入服务地址");
       return;
+    }
+    // Android http 需显式协议前缀
+    if (!/^https?:\/\//i.test(candidate)) {
+      candidate = "http://" + candidate;
     }
     setTesting(true);
     setErr("");
     setOk(false);
     try {
+      // 10s 超时，避免卡住
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 10000);
       // 刷新前临时尝试连接候选地址的后端 /api/settings
-      const res = await fetch(`${candidate}/api/settings`, { method: "GET" });
+      const res = await fetch(`${candidate}/api/settings`, { method: "GET", signal: ctrl.signal });
+      clearTimeout(timer);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setOk(true);
     } catch (e: unknown) {
-      setErr((e instanceof Error ? e.message : String(e)) + " — 无法连接，请检查地址/后端是否启动");
+      const msg = e instanceof Error ? e.message : String(e);
+      // 区分常见错误，便于定位
+      if (msg.includes("abort") || msg.includes("timeout")) {
+        setErr("连接超时（10s）。请确认手机能访问该地址、后端已启动、防火墙放行");
+      } else if (msg.includes("Failed to fetch") || msg.includes("Network request failed")) {
+        setErr("网络请求失败。若在 APK 内：可能是明文 http 被拦截，或地址格式不对（需 http:// 前缀）");
+      } else {
+        setErr(`连接失败: ${msg} — 请检查地址/后端是否启动`);
+      }
     } finally {
       setTesting(false);
     }

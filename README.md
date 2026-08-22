@@ -48,11 +48,18 @@ pnpm dev
 ```
 
 ### 局域网访问
-前端默认已绑 `0.0.0.0`，局域网内其他设备访问：
+后端默认绑 `0.0.0.0:7800`（显式 IPv4，安卓/外网设备可访问），前端默认绑 `0.0.0.0:5173`。局域网内设备访问：
+```bash
+# 后端
+cd backend && go run .   # 默认 0.0.0.0:7800，数据在 backend/data/tomato.db
+
+# 前端
+cd frontend && pnpm dev   # http://localhost:5173
 ```
-http://<本机局域网IP>:5173
-```
-> 注意：通过局域网 IP（非 localhost/HTTPS）访问时，浏览器安全上下文限制会导致**录音不可用**。详见文档。
+其他设备（手机/PC）访问：`http://<本机局域网IP>:5173`（前端，代理 /api 到后端）或 `http://<本机局域网IP>:7800/api/...`（直接后端）。
+
+> ⚠️ 后端一定要用 `0.0.0.0:7800`（不是 `:7800`）。Go 的 `:port` 绑 IPv6-only 双栈，安卓等客户端连不上。
+> ⚠️ 录音需安全上下文（HTTPS 或 localhost），局域网 IP 访问时录音不可用，需 HTTPS/Tailscale。
 
 ## Android APK（Capacitor + GitHub CI）
 

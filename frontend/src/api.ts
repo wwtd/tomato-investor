@@ -18,7 +18,11 @@ export function getBase(): string {
 }
 
 export function setServerUrl(url: string) {
-  localStorage.setItem(STORAGE_KEY, url.trim().replace(/\/$/, ""));
+  let u = url.trim().replace(/\/$/, "");
+  if (u && !/^https?:\/\//i.test(u)) {
+    u = "http://" + u;
+  }
+  localStorage.setItem(STORAGE_KEY, u);
 }
 
 export function getServerUrl(): string {

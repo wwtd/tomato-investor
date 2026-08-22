@@ -5,6 +5,7 @@
 ## 决策日志
 - 2026-08-21: 锁定 MVP 范围。Go+React，单用户预留 owner_id，番茄=可配置时长(默认8h/480min)，会话=一次会话多次暂停(START→[PAUSE+comment→RESUME]*→END)，语音备注仅存音频+手填文本，部署=本地自托管 SQLite。
 - 2026-08-21: Android 打包方案 = 本地只做前端适配 + GitHub CI 出 Debug APK（无需本机 Android SDK/JDK）。API 地址改为运行时可配置（localStorage server_url）。
+- 2026-08-21(排障): 手机连不上 7800 的根因 = Go `ListenAndServe(":7800")` 绑成 IPv6-only(::)双栈，安卓对 IPv4-mapped 处理不佳。修复：`--addr` 默认改 `0.0.0.0:7800`。另发 APK 需用真实数据库 `backend/data/tomato.db`（勿连 /tmp）。
 
 ## 已完成
 - [x] 设计文档 docs/DESIGN.md
