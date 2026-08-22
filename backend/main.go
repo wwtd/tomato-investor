@@ -16,7 +16,10 @@ import (
 )
 
 func main() {
-	addr := flag.String("addr", ":7800", "listen address")
+	// 默认绑定 0.0.0.0 而非 :7800 —— Go 的 ":port" 会绑成 IPv6-only(::)双栈，
+	// 部分客户端(安卓/非 Linux)对 IPv4-mapped 处理不一致导致外部无法访问。
+	// 显式 0.0.0.0 强制 IPv4 全地址监听，局域网/外网设备均可连。
+	addr := flag.String("addr", "0.0.0.0:7800", "listen address")
 	dbPath := flag.String("db", "", "sqlite path (default ./data/tomato.db)")
 	flag.Parse()
 
