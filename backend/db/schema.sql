@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS sessions (
                     CHECK (status IN ('running','paused','ended')),
   started_at      DATETIME NOT NULL DEFAULT (datetime('now')),
   ended_at        DATETIME,
-  consumed_tomato INTEGER NOT NULL DEFAULT 0,  -- 结束时置 1 表示消耗一番茄
+  consumed_tomato REAL NOT NULL DEFAULT 0,  -- 结束时按 实际分钟/tomato_minutes 折算的小数番茄
   note            TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS idx_sessions_project ON sessions(project_id);

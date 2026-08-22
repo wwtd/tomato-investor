@@ -18,7 +18,7 @@ type Project struct {
 
 	// 聚合字段（详情用）
 	Milestones       []Milestone `json:"milestones,omitempty"`
-	ConsumedTomatoes int         `json:"consumed_tomatoes"`
+	ConsumedTomatoes float64     `json:"consumed_tomatoes"`
 	ConsumedMinutes  int         `json:"consumed_minutes"`
 }
 
@@ -38,7 +38,7 @@ type Session struct {
 	Status         string  `json:"status"`
 	StartedAt      string  `json:"started_at"`
 	EndedAt        *string `json:"ended_at"`
-	ConsumedTomato int     `json:"consumed_tomato"`
+	ConsumedTomato float64 `json:"consumed_tomato"`
 	Note           string  `json:"note"`
 
 	Events []SessionEvent `json:"events,omitempty"`
@@ -104,8 +104,7 @@ type UpdateMilestoneReq struct {
 }
 
 type EndSessionReq struct {
-	Note           string `json:"note"`
-	ConsumeTomato  bool   `json:"consume_tomato"`
+	Note string `json:"note"`
 }
 
 type CommentReq struct {

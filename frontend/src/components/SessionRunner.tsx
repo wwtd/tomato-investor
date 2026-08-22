@@ -72,9 +72,9 @@ export function SessionRunner({
     }
   }
 
-  async function endSession(consume: boolean) {
+  async function endSession() {
     try {
-      await api.endSession(cur.id, endNote, consume);
+      await api.endSession(cur.id, endNote);
       setShowEnd(false);
       onChange();
     } catch (e: unknown) {
@@ -142,15 +142,14 @@ export function SessionRunner({
             placeholder="结束总结…"
             rows={2}
           />
-          <label className="check-row">
-            <input type="checkbox" defaultChecked /> 消耗 1 个番茄预算
-          </label>
+          <div className="muted end-hint">
+            🔁 番茄按实际运行时长自动折算消耗（运行分钟 ÷ 番茄时长，保留 2 位小数）
+          </div>
           <div className="form-actions">
             <button onClick={() => setShowEnd(false)}>取消</button>
-            <button className="danger" onClick={() => endSession(true)}>
-              结束并消耗番茄
+            <button className="danger" onClick={endSession}>
+              结束
             </button>
-            <button onClick={() => endSession(false)}>结束不消耗</button>
           </div>
         </div>
       )}

@@ -116,11 +116,11 @@ function ProjectCard({ project: p, onClick }: { project: Project; onClick: () =>
       <div className="card-budget">
         {stats ? (
           <>
-            🍅 {stats.consumed} / {stats.budget}
+            🍅 {fmtTomato(stats.consumed)} / {stats.budget}
             <div className="progress">
               <div
                 className="progress-bar"
-                style={{ width: `${stats.budget ? (stats.consumed / stats.budget) * 100 : 0}%` }}
+                style={{ width: `${stats.budget ? (Math.min(stats.consumed / stats.budget, 1) * 100).toFixed(1) : 0}%` }}
               />
             </div>
           </>
@@ -330,4 +330,10 @@ export function Field({ label, children }: { label: string; children: React.Reac
       {children}
     </label>
   );
+}
+
+// 番茄数显示，最多 2 位小数，去掉尾随 0（如 0.5 / 1 / 0.1）
+function fmtTomato(t: number): string {
+  const rounded = Math.round(t * 100) / 100;
+  return String(rounded);
 }

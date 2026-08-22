@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"encoding/json"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -180,10 +181,11 @@ func (h *ProjectHandler) stats(w http.ResponseWriter, r *http.Request) {
 	if tmins == 0 {
 		tmins = gmins
 	}
-	writeJSON(w, map[string]int{
+	remainingT := math.Round((float64(budget)-consumed)*100) / 100
+	writeJSON(w, map[string]any{
 		"budget_tomatoes":   budget,
 		"consumed_tomatoes": consumed,
-		"remaining_tomatoes": budget - consumed,
+		"remaining_tomatoes": remainingT,
 		"tomato_minutes":    tmins,
 		"consumed_minutes":  minutes,
 		"remaining_minutes": budget*tmins - minutes,
@@ -280,11 +282,11 @@ func fetchMilestones(d *sql.DB, projectID int64) ([]model.Milestone, error) {
 	return out, nil
 }
 
-// projectUsage 返回 (已消耗番茄数, 已投入分钟)
-func projectUsage(d *sql.DB, projectID int64) (int, int, error) {
-	// 已结束且 consumed_tomato=1 的会话数 = 已消耗番茄
-	var consumed int
-	if err := d.QueryRow(`SELECT COUNT(*) FROM sessions WHERE project_id=? AND consumed_tomato=1`, projectID).Scan(&consumed); err != nil {
+// projectUsage 返回 (已消耗番茄数(小数), 已投入分钟)
+func projectUsage(d *sql.DB, projectID int64) (float64, int, error) {
+	// 已结束会话的 consumed_tomato 折算值求和 = 已消耗番茄
+	var consumed float64
+	if err := d.QueryRow(`SELECT COALESCE(SUM(consumed_tomato),0) FROM sessions WHERE project_id=?`, projectID).Scan(&consumed); err != nil {
 		return 0, 0, err
 	}
 	minutes, err := projectMinutes(d, projectID)

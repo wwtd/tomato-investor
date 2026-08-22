@@ -142,8 +142,8 @@ export const api = {
     req<Session>(`/sessions/${sid}/resume`, { method: "POST" }),
   commentSession: (sid: number, text: string) =>
     req<{ id: number; ok: boolean }>(`/sessions/${sid}/comment`, { method: "POST", body: JSON.stringify({ text }) }),
-  endSession: (sid: number, note: string, consume: boolean) =>
-    req<Session>(`/sessions/${sid}/end`, { method: "POST", body: JSON.stringify({ note, consume_tomato: consume }) }),
+  endSession: (sid: number, note: string) =>
+    req<Session>(`/sessions/${sid}/end`, { method: "POST", body: JSON.stringify({ note }) }),
 
   getSettings: () => req<Settings>(`/settings`),
   updateSettings: (tomato_minutes: number) =>

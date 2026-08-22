@@ -90,12 +90,12 @@ export function ProjectDetail({
             <div className="budget-box">
               <div className="budget-row">
                 <span>🍅 已投入 / 预算</span>
-                <strong>{stats.consumed_tomatoes} / {stats.budget_tomatoes}</strong>
+                <strong>{fmtTomato(stats.consumed_tomatoes)} / {stats.budget_tomatoes}</strong>
               </div>
               <div className="progress">
                 <div
                   className="progress-bar"
-                  style={{ width: `${stats.budget_tomatoes ? (stats.consumed_tomatoes / stats.budget_tomatoes) * 100 : 0}%` }}
+                  style={{ width: `${stats.budget_tomatoes ? (Math.min(stats.consumed_tomatoes / stats.budget_tomatoes, 1) * 100).toFixed(1) : 0}%` }}
                 />
               </div>
               <div className="budget-row">
@@ -105,7 +105,7 @@ export function ProjectDetail({
               <div className="budget-row">
                 <span>剩余</span>
                 <strong className={stats.remaining_tomatoes <= 0 ? "danger" : ""}>
-                  🍅 {stats.remaining_tomatoes} ({fmtMin(stats.remaining_minutes)})
+                  🍅 {fmtTomato(stats.remaining_tomatoes)} ({fmtMin(stats.remaining_minutes)})
                 </strong>
               </div>
             </div>
@@ -136,7 +136,7 @@ export function ProjectDetail({
               <span>#{s.id}</span>
               <span>{s.status === "ended" ? "已结束" : s.status === "paused" ? "暂停中" : "运行中"}</span>
               <span className="muted">{s.started_at}</span>
-              {s.consumed_tomato === 1 && <span>🍅</span>}
+              {s.consumed_tomato > 0 && <span>🍅 {fmtTomato(s.consumed_tomato)}</span>}
               {s.note && <span className="muted">· {s.note.slice(0, 30)}</span>}
             </div>
           ))}
@@ -152,5 +152,11 @@ function fmtMin(m: number): string {
   const h = Math.floor(m / 60);
   const r = m % 60;
   return r ? `${h}时${r}分` : `${h}时`;
+}
+
+// 番茄数显示，最多 2 位小数，去掉尾随 0（如 0.5 / 1 / 0.1）
+function fmtTomato(t: number): string {
+  const rounded = Math.round(t * 100) / 100;
+  return String(rounded);
 }
 

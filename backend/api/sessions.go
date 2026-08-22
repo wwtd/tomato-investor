@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"time"
 
@@ -182,13 +183,27 @@ func (h *SessionHandler) end(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 404, "session not found")
 		return
 	}
-	consume := 1
-	if !req.ConsumeTomato {
-		consume = 0
+	// 自动折算: 实际运行分钟 / 番茄时长，四舍五入 2 位小数
+	var (
+		pid, pmins, gmins int
+		startedStr        string
+		ended             sql.NullString
+	)
+	h.DB.QueryRow(`SELECT s.project_id, COALESCE(p.tomato_minutes,0), (SELECT tomato_minutes FROM users WHERE id=1), s.started_at, s.ended_at
+		FROM sessions s JOIN projects p ON p.id=s.project_id WHERE s.id=?`, sid).
+		Scan(&pid, &pmins, &gmins, &startedStr, &ended)
+	tmins := pmins
+	if tmins == 0 {
+		tmins = gmins
 	}
+	if tmins < 1 {
+		tmins = 480
+	}
+	minutes := sessionMinutesByID(h.DB, sid, startedStr, ended, status)
+	consumed := math.Round(float64(minutes)/float64(tmins)*100) / 100
 	// 若中途暂停未恢复，补一个 pause 事件已在；end 时直接 ended
 	if _, err := h.DB.Exec(`UPDATE sessions SET status='ended', ended_at=datetime('now'), consumed_tomato=?, note=? WHERE id=?`,
-		consume, req.Note, sid); err != nil {
+		consumed, req.Note, sid); err != nil {
 		writeErr(w, 500, err)
 		return
 	}
