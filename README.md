@@ -5,7 +5,7 @@
 ## 核心概念
 
 - **番茄**：抽象投资单位，默认 480 分钟（8h），**可全局或按项目配置**。不是传统 25 分钟番茄钟，而是可分段的长会话单位。
-- **会话生命周期**：一次会话可多次暂停，每次暂停可记录情景备注（文本/语音）。`START → [PAUSE+comment → RESUME]* → END`，结束时决定是否消耗 1 番茄预算。
+- **会话生命周期**：一次会话可多次暂停，每次暂停可记录情景备注（文本/语音）。`START → [PAUSE+comment → RESUME]* → END`，结束时**自动按实际运行时长折算消耗番茄**（`实际分钟 ÷ 番茄时长`，保留 2 位小数）。
 - **投资预算**：每个项目设定"投资几个番茄"，追踪已投入/剩余。
 - **止损归档**：预算用光但产出不及预期时，可归档停止，避免沉没成本。
 
@@ -131,7 +131,7 @@ tomato-dir/
 ## 数据模型要点
 
 - `projects`：标题、必要性、最小集、止损说明、预算番茄数、番茄时长覆盖、状态(active/completed/archived_stoploss)
-- `sessions`：一次番茄会话，状态(running/paused/ended)，`consumed_tomato` 标记是否消耗预算
+- `sessions`：一次番茄会话，状态(running/paused/ended)，`consumed_tomato`(REAL) 存按实际运行时长折算的小数番茄消耗
 - `session_events`：会话内事件流(pause/resume/comment/voice_note)，用于重建运行时长（暂停不计时）
 - `voice_notes`：语音备注文件 + 手填文字
 - 单用户，所有表预留 `owner_id` 字段，未来可扩多用户

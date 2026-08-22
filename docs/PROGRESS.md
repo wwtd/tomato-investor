@@ -8,6 +8,7 @@
 - 2026-08-21(排障): 手机连不上 7800 的根因 = Go `ListenAndServe(":7800")` 绑成 IPv6-only(::)双栈，安卓对 IPv4-mapped 处理不佳。修复：`--addr` 默认改 `0.0.0.0:7800`。另发 APK 需用真实数据库 `backend/data/tomato.db`（勿连 /tmp）。
 - 2026-08-22(APK 明文被拦,已解决): `usesCleartextTraffic` / `networkSecurityConfig` 在 Capacitor WebView 对「https://localhost origin + 局域网 http 明文」组合下不生效。**最终方案 = 启用 `plugins.CapacitorHttp.enabled=true`**（Capacitor 官方机制），在原生端 patch `window.fetch`/`XMLHttpRequest`，让 API 请求走原生网络栈，绕开 WebView 混合内容/CORS 限制。Web 端自动回退 fetch 向后兼容。**无需改 api.ts 业务代码。** 已实测手机 APK 运行良好。
 - 2026-08-22(consumed_minutes 恒 0,已解决): `mattn/go-sqlite3` 扫描 DATETIME 返回 RFC3339(`2026-08-22T02:10:33Z`)，而 `durMin` 用空格分隔 layout(`2006-01-02 15:04:05`)解析全部失败 → 运行时长恒 0。修复: `parseTime` 兼容空格+RFC3339 双格式，`nowUTC()` 统一 RFC3339。已投入分钟数现正确。
+- 2026-08-22(番茄消耗模型重构): 番茄定为**可分割时间单位**。`sessions.consumed_tomato` 从 INT(0/1) 改 REAL 小数折算，结束会话时**自动**计算 `consumed = 实际运行分钟/tomato_minutes`(四舍五入2位)。移除结束时的「消耗/不消耗」勾选。预算=整数番茄，消耗=小数累加，剩余=预算-SUM(consumed) 支持小数。前端番茄数最多显示2位小数。验证: 10min÷480min=0.02, 剩余 3-0.02=2.98 ✅。**注意**: schema.sql 新库用 REAL；现有库靠 SQLite INTEGER affinity 动态存 REAL(已验证)，无需重建表。
 
 ## 已完成
 - [x] 设计文档 docs/DESIGN.md
