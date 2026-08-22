@@ -57,6 +57,12 @@ jobs:
           cd android
           ./gradlew assembleDebug
 
+      - name: Dump merged manifest (diagnose cleartext)
+        run: |
+          find android/app/build -name "AndroidManifest.xml" -path "*merged*" -exec echo "=== {} ===" \; -exec grep -cE 'usesCleartextTraffic|networkSecurityConfig' {} \;
+          echo "--- merged manifest cleartext lines ---"
+          find android/app/build -name "AndroidManifest.xml" -path "*merged*" -exec grep -E 'usesCleartextTraffic|networkSecurityConfig' {} \;
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
