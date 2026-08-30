@@ -57,17 +57,23 @@
 
 **前置**：Go 1.19+、Node 18+、pnpm、gcc（cgo 需要）。
 
-### 启动后端
+### 一键启动 / 停止（推荐）
 ```bash
+./start.sh   # 构建后端 → 后台启动后端(:7800) + 前端(:5173)，就绪后打印访问地址
+./stop.sh    # 一键停止前后端
+```
+- 日志与 PID 在 `logs/`（backend.log / frontend.log），已加入 .gitignore。
+- 后端有源码改动会自动重新构建；首次运行自动 `pnpm install`。
+
+### 手动启动（两个终端）
+```bash
+# 后端
 cd backend
 go run . -addr :7800   # 默认 0.0.0.0:7800，数据在 backend/data/tomato.db
-```
 
-### 启动前端（开发）
-```bash
+# 前端
 cd frontend
-pnpm install
-pnpm dev   # http://localhost:5173，自动代理 /api 到后端 :7800
+pnpm install && pnpm dev   # http://localhost:5173，自动代理 /api 到后端
 ```
 
 ### 其他设备访问

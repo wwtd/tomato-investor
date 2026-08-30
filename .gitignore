@@ -1,7 +1,9 @@
 # 数据与产物
 backend/data/
+backend/tomato-server
 frontend/dist/
 frontend/node_modules/
+logs/
 *.log
 
 # 系统

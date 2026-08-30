@@ -21,6 +21,7 @@
 - [x] Android 适配: cleartext HTTP + RECORD_AUDIO 权限，删除模板占位测试
 - [x] API 服务地址可配置: api.ts getBase()/setServerUrl() 基于 localStorage; UI 加「🔗服务地址」+测试连接
 - [x] GitHub CI: .github/workflows/android-build.yml，自动 assembleDebug + 上传 APK artifact
+- [x] 一键启动/停止: 根目录 start.sh / stop.sh（后台拉起后端+前端，logs/ 存日志与 PID，源码变更自动重建）
 
 ## E2E 验证记录 (2026-08-21)
 全流程通过：
@@ -45,6 +46,7 @@
 
 ## 下一步（非 MVP，按需迭代）
 - [x] 移动端 APP（Capacitor + CI 出 debug APK，首次构建需 push 后查看 Actions 结果）
+- [x] 一键启动/停止（start.sh / stop.sh，本机使用便捷性）
 - [ ] 前端浏览器实测 UI（需 pnpm dev + 浏览器交互）
 - [ ] STT 语音转写
 - [ ] 任务链并行视图

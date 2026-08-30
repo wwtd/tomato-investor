@@ -4,6 +4,16 @@
 - Go 1.19+（用了 cgo sqlite3，需 gcc）
 - Node 18+/pnpm
 
+## 一键启动 / 停止（推荐）
+```bash
+./start.sh   # 构建后端（有改动时）→ 后台启动后端(:7800) + 前端(:5173)，就绪后打印访问地址
+./stop.sh    # 一键停止前后端（清理各自进程组）
+```
+- 日志与 PID：`logs/backend.log`、`logs/frontend.log`、`logs/*.pid`（已 gitignore）
+- 已启动时再跑 `./start.sh` 会提示先 `./stop.sh`
+- 首次运行自动 `pnpm install`；后端 go 源码有更新时自动重新构建
+- 端口被其他进程占用时 `./stop.sh` 会提示
+
 ## 启动后端
 ```bash
 cd backend
